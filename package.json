@@ -10,8 +10,14 @@
   "bugs": {
     "url": "https://github.com/AidaMichel/evaltape/issues"
   },
+  "files": [
+    "dist",
+    "bin/evaltape.js"
+  ],
   "scripts": {
-    "test": "tsx --test src/*.test.ts"
+    "build": "tsc -p tsconfig.build.json",
+    "test": "tsx --test src/*.test.ts",
+    "prepack": "npm run build && npm test"
   },
   "keywords": [
     "ai-agents",
@@ -23,7 +29,13 @@
   "author": "AidaMichel",
   "license": "MIT",
   "bin": {
-    "evaltape": "./bin/evaltape"
+    "evaltape": "./bin/evaltape.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "zod": "^4.6.5"

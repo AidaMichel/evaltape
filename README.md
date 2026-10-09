@@ -1,17 +1,20 @@
-
 # EvalTape
 
 **Do the task once. Test any agent against the outcome.**
 
 EvalTape turns a successful human demonstration into a reusable, deterministic acceptance test for agents.
 
-Instead of forcing every agent to follow the same clicks or procedure, EvalTape focuses primarily on **what must be true when the task is finished**.
+Instead of forcing every agent to repeat the same clicks or procedure, EvalTape focuses on a simpler question:
 
-A human can perform a task manually. EvalTape captures the state before and after, proposes a success contract, asks the human to approve it, and saves that contract.
+> **Did the agent achieve the outcome the human approved?**
+
+A human performs a task once.
+
+EvalTape captures the state before and after, proposes a success contract, asks the human to approve it, and saves that contract.
 
 Later, another agent can attempt the same task through a completely different path.
 
-EvalTape evaluates the result and returns:
+EvalTape then returns:
 
 ```text
 PASS ✓
@@ -23,13 +26,13 @@ or:
 FAIL ✗
 ```
 
-with the exact condition that failed.
+with the exact condition that passed or failed.
 
 ---
 
-## Why EvalTape?
+# Why EvalTape?
 
-Most agent tests start by manually writing assertions.
+Most agent evals begin by manually writing assertions.
 
 But often the easiest way to explain what success looks like is simply to **do the task once**.
 
@@ -57,47 +60,97 @@ DIFFERENT AGENT EXECUTION
 PASS / FAIL
 ```
 
-The key idea is:
+The core idea is:
 
 > **The demonstration provides evidence. The approved contract defines success.**
 
-The demonstration is not blindly replayed.
+EvalTape does not blindly replay the demonstration.
 
 ---
 
-# Current V0
+# Current Status
 
-EvalTape is currently a **working V0 / research prototype**.
+**EvalTape V0 is a working research prototype.**
 
-The complete end-to-end flow has been proven against real GitHub Issues.
+The full V0 workflow has been validated against real GitHub Issues, including:
 
-V0 currently supports:
+- human browser demonstrations
+- automatic before / after capture
+- candidate contract generation
+- human approval
+- deterministic PASS and FAIL evaluation
+- alternate agent execution paths
+- no-op protection
+- runtime validation
+- clean-clone installation
+- packaged npm tarball installation
+- execution outside the source repository
+- execution without `tsx`
 
-- GitHub Issues as the main real product integration
-- automatic before-state capture
-- automatic after-state capture
-- natural-language task authoring for one narrow GitHub issue task family
-- state diffing
-- candidate outcome-contract generation
-- human contract approval
-- saved eval artifacts
-- deterministic outcome evaluation
-- alternate execution paths
-- explicit PASS / FAIL explanations
-- prevention of overlapping human-recording and agent-run sessions
-- preserved run evidence
-- runtime validation of GitHub API data
-- fail-closed behavior when the demonstration contradicts task intent
+The next milestone is external-user validation:
 
-EvalTape does **not** yet claim to support arbitrary websites, arbitrary natural-language tasks, or arbitrary agent workflows.
+> Can someone who did not build EvalTape understand, install, and use it without developer guidance?
 
-That restriction is intentional.
+Until that is tested, the priority is usability and evidence rather than expanding the feature surface.
+
+---
+
+# Quick Start
+
+## Run without installing globally
+
+```bash
+npx evaltape
+```
+
+See the available adapters:
+
+```bash
+npx evaltape adapters
+```
+
+## Or install globally
+
+```bash
+npm install -g evaltape
+```
+
+Then run:
+
+```bash
+evaltape
+```
+
+---
+
+# Requirements
+
+EvalTape V0 requires:
+
+- Node.js 20 or newer
+- npm
+- GitHub CLI (`gh`) for the GitHub Issues workflow
+- a GitHub account with access to the repository you want to test
+
+Authenticate GitHub CLI:
+
+```bash
+gh auth login
+```
+
+Verify authentication:
+
+```bash
+gh auth status
+```
+
+For testing, use a sandbox or non-production GitHub repository.
 
 ---
 
 # Core Principle
 
-EvalTape distinguishes between:
+EvalTape distinguishes between **procedure** and **outcome**.
 
 ## Procedure
 
@@ -113,8 +166,6 @@ Open GitHub
 → choose assignee
 → click Create
 ```
-
-and:
 
 ## Outcome
 
@@ -132,7 +183,7 @@ the matching issue did not already exist before the run
 
 EvalTape V0 primarily evaluates the **outcome**.
 
-That means two trajectories can be different while still producing the same valid result.
+That means two trajectories can be completely different while still producing the same valid result.
 
 For example:
 
@@ -155,110 +206,28 @@ PASS ✓
 
 ---
 
-# Requirements
-
-Before running EvalTape locally, install:
-
-- Node.js
-- npm
-- Git
-- GitHub CLI (`gh`)
-
-You must also authenticate GitHub CLI:
-
-```bash
-gh auth login
-```
-
-Verify authentication:
-
-```bash
-gh auth status
-```
-
-EvalTape V0 expects access to a GitHub repository where you are allowed to create and modify issues.
-
-For testing, use a sandbox or non-production repository.
-
----
-
-# Installation
-
-Clone this repository and enter the project directory.
-
-Then install dependencies:
-
-```bash
-npm install
-```
-
-Create the local `evaltape` command:
-
-```bash
-npm link
-```
-
-Verify:
-
-```bash
-evaltape
-```
-
-You should see the EvalTape CLI help.
-
-Check the available adapters:
-
-```bash
-evaltape adapters
-```
-
-Current output includes:
-
-```text
-AVAILABLE ADAPTERS:
-- github-issues
-- shop
-```
-
-The complete user-facing V0 lifecycle currently targets `github-issues`.
-
----
-
-# Run the Test Suite
-
-Run:
-
-```bash
-npm test
-```
-
-The current suite protects important invariants including:
-
-- the compiler cannot silently weaken explicit task intent
-- correct outcomes pass
-- incorrect required values fail
-- a pre-existing correct state does not receive fake credit
-- GitHub data is normalized correctly
-- pull requests returned through the GitHub Issues API are filtered out
-- malformed external GitHub data is rejected
-- supported natural-language task instructions are converted into structured task requirements
-- unsupported task instructions fail instead of being guessed
-
----
-
 # Workflow 1 — Author an Eval
 
-The first workflow creates a reusable eval from a human demonstration.
+The first workflow turns a successful human demonstration into a reusable eval.
 
 ## Step 1 — Start Recording
 
 Example:
 
 ```bash
+npx evaltape record \
+  --adapter github-issues \
+  --repo YOUR_USERNAME/YOUR_REPOSITORY \
+  --task "Create an open issue titled 'Payment timeout' assigned to YOUR_USERNAME"
+```
+
+If EvalTape is installed globally, you can use:
+
+```bash
 evaltape record \
   --adapter github-issues \
-  --repo AidaMichel/agile-final-project \
-  --task "Create an open issue titled 'Payment timeout' assigned to AidaMichel"
+  --repo YOUR_USERNAME/YOUR_REPOSITORY \
+  --task "Create an open issue titled 'Payment timeout' assigned to YOUR_USERNAME"
 ```
 
 EvalTape captures the current GitHub state before the task.
@@ -270,8 +239,8 @@ CAPTURING BEFORE STATE...
 
 ✓ RECORDING STARTED
 Adapter: github-issues
-Repo: AidaMichel/agile-final-project
-Task: Create an open issue titled 'Payment timeout' assigned to AidaMichel
+Repo: YOUR_USERNAME/YOUR_REPOSITORY
+Task: Create an open issue titled 'Payment timeout' assigned to YOUR_USERNAME
 Captured entities: 10
 Before snapshot: .../.evaltape/recordings/.../before.json
 
@@ -279,7 +248,7 @@ Now perform the task manually in GitHub.
 When finished, run: evaltape finish
 ```
 
-At this point, perform the task yourself.
+Now perform the task yourself.
 
 For this example:
 
@@ -291,19 +260,20 @@ For this example:
 Payment timeout
 ```
 
-4. Assign:
-
-```text
-AidaMichel
-```
-
+4. Assign the requested GitHub user.
 5. Leave the issue open.
 
 ---
 
 ## Step 2 — Finish the Demonstration
 
-Run:
+If using `npx`:
+
+```bash
+npx evaltape finish
+```
+
+If installed globally:
 
 ```bash
 evaltape finish
@@ -342,7 +312,7 @@ MUST NOT:
 ✓ [before] target must not exist
 ```
 
-It also shows known V0 limitations:
+Known V0 limitations are shown explicitly:
 
 ```text
 WARNINGS:
@@ -351,7 +321,7 @@ WARNINGS:
 ! Matching currently requires task-variable names to match entity field names.
 ```
 
-EvalTape then asks:
+EvalTape asks:
 
 ```text
 Approve this contract? [y/n]:
@@ -367,10 +337,14 @@ EvalTape saves the approved eval:
 
 ```text
 ✓ APPROVED EVAL SAVED
-.../.evaltape/evals/<eval-file>.json
+/path/to/.evaltape/evals/task-....json
 
 ✓ RECORDING COMPLETE
 ```
+
+Keep that saved eval path.
+
+You will use it to test another execution.
 
 ---
 
@@ -380,9 +354,7 @@ The demonstration is evidence.
 
 It is **not automatically authoritative**.
 
-EvalTape proposes the contract, but the human remains the authority on what success means.
-
-This protects against cases where the demonstration contains incidental details that should not become requirements.
+EvalTape proposes the contract, but the human remains the authority on what success actually means.
 
 For example, suppose the task is:
 
@@ -390,17 +362,19 @@ For example, suppose the task is:
 Create an open issue titled "Payment timeout" assigned to AidaMichel
 ```
 
-but the human also writes this issue body:
+but the human also writes this body:
 
 ```text
 Found during checkout testing.
 ```
 
-The body is not part of the task intent.
+The body was not part of the task intent.
 
-EvalTape should not automatically require every future agent to reproduce that exact body.
+A future agent should not automatically fail because it used a different body.
 
-The goal is the **smallest correct success contract**, not an exact copy of every observed detail.
+The goal is:
+
+> **The smallest correct success contract, not an exact copy of every observed detail.**
 
 ---
 
@@ -437,7 +411,13 @@ This is an important design rule:
 
 # Cancel a Human Recording
 
-If you started a recording but do not want to complete it:
+If you start a recording but do not want to complete it:
+
+```bash
+npx evaltape cancel
+```
+
+or:
 
 ```bash
 evaltape cancel
@@ -445,45 +425,45 @@ evaltape cancel
 
 EvalTape removes the active-session marker while preserving the captured evidence directory.
 
-Example:
-
-```text
-✓ RECORDING CANCELLED
-Repo: AidaMichel/agile-final-project
-Evidence preserved at: .../.evaltape/recordings/...
-```
-
 ---
 
-# Workflow 2 — Test Another Execution
+# Workflow 2 — Test Another Agent
 
-Once an eval exists, EvalTape can evaluate another attempt.
+Once you have an approved eval, another agent can attempt the task.
 
-The other execution does **not** need to reproduce the human demonstration path.
+The alternate execution does **not** need to repeat the human demonstration path.
 
 It can use:
 
 - another browser agent
 - GitHub CLI
 - GitHub API
-- an MCP / connector integration
+- an MCP or connector integration
 - another automation system
 - another future agent runtime
 
-What matters is whether the approved contract is satisfied.
+What matters is whether the approved outcome contract is satisfied.
 
 ---
 
 ## Step 1 — Start an Agent Run
 
-Use an approved eval file.
+Use the approved eval created during the human demonstration.
 
-For the included real GitHub example:
+For example:
+
+```bash
+npx evaltape run \
+  --eval .evaltape/evals/YOUR_APPROVED_EVAL.json \
+  --repo YOUR_USERNAME/YOUR_REPOSITORY
+```
+
+Or, when globally installed:
 
 ```bash
 evaltape run \
-  --eval examples/github-real/approved-eval.json \
-  --repo AidaMichel/agile-final-project
+  --eval .evaltape/evals/YOUR_APPROVED_EVAL.json \
+  --repo YOUR_USERNAME/YOUR_REPOSITORY
 ```
 
 Example output:
@@ -492,8 +472,8 @@ Example output:
 CAPTURING AGENT-RUN BASELINE...
 
 ✓ AGENT RUN STARTED
-Repo: AidaMichel/agile-final-project
-Task: Create an open GitHub issue titled "EvalTape real adapter test 001" assigned to AidaMichel.
+Repo: YOUR_USERNAME/YOUR_REPOSITORY
+Task: Create an open GitHub issue titled "Payment timeout" assigned to YOUR_USERNAME.
 Captured entities: 10
 Before snapshot: .../.evaltape/runs/.../before.json
 
@@ -504,26 +484,42 @@ When it is finished, run: evaltape check
 EvalTape freezes:
 
 - the before state
-- the exact approved eval used for the run
+- the exact approved eval
 - the task being evaluated
 
-The eval is copied into the run evidence directory so changing the original file later does not silently change an active evaluation.
+The eval is copied into the run evidence directory so changing the original eval later cannot silently change an active run.
 
 ---
 
 ## Step 2 — Let Another Agent Perform the Task
 
-The alternate agent can use a different trajectory.
+Now let another agent attempt the task.
 
-For example, the human demonstration may have used the GitHub website while another agent creates the issue through an API integration.
+For example:
 
-EvalTape does not require matching clicks.
+```text
+Human demonstration:
+GitHub browser UI
+
+Alternate execution:
+GitHub API
+```
+
+The trajectories may differ.
+
+The required outcome must not.
 
 ---
 
 ## Step 3 — Check the Result
 
-Run:
+If using `npx`:
+
+```bash
+npx evaltape check
+```
+
+Or:
 
 ```bash
 evaltape check
@@ -542,7 +538,7 @@ EVAL RESULT
 PASS ✓
 ```
 
-EvalTape also stores the evidence:
+EvalTape also preserves the evidence:
 
 ```text
 Evidence: .../.evaltape/runs/<run-id>
@@ -555,7 +551,7 @@ Result: .../.evaltape/runs/<run-id>/result.json
 
 # Example Failure
 
-If the agent does not create the required issue, EvalTape can return:
+If the agent does not create the required issue:
 
 ```text
 EVAL RESULT
@@ -582,29 +578,27 @@ If the issue exists but the assignee is wrong:
   observed: []
 ```
 
-This is intentionally more useful than a single opaque score.
-
-The user can see **why** the execution failed.
+EvalTape intentionally reports **why** the run failed instead of returning only an opaque score.
 
 ---
 
 # No-Op Protection
 
-EvalTape also distinguishes:
+EvalTape distinguishes between:
 
 ```text
 "The required state exists"
 ```
 
-from:
+and:
 
 ```text
 "The agent actually caused the required transition"
 ```
 
-Suppose the target issue already existed before the run.
+Suppose the correct issue already existed before the run.
 
-If the agent does nothing, the final state may look correct.
+If the agent does nothing, the final state may still look correct.
 
 But the contract can include:
 
@@ -635,19 +629,19 @@ This prevents agents from receiving credit for pre-existing success.
 
 # Cancel an Agent Run
 
-If an agent evaluation is active and you want to abandon it:
+Cancel an active agent evaluation with:
+
+```bash
+npx evaltape cancel-run
+```
+
+or:
 
 ```bash
 evaltape cancel-run
 ```
 
-This is different from:
-
-```bash
-evaltape cancel
-```
-
-The commands manage separate session types:
+Human recordings and agent runs are separate session types:
 
 ```text
 evaltape record
@@ -670,7 +664,7 @@ evaltape cancel-run
 → cancel agent evaluation
 ```
 
-EvalTape prevents a human recording and agent evaluation from running at the same time.
+EvalTape prevents a human demonstration and agent evaluation from being active at the same time.
 
 ---
 
@@ -690,15 +684,15 @@ Important directories include:
 .evaltape/evals/
 ```
 
-These are runtime artifacts and are ignored by Git.
+These contain evidence such as:
 
-A deliberate example eval is tracked separately at:
+- task intent
+- before state
+- after state
+- frozen approved evals
+- deterministic evaluation results
 
-```text
-examples/github-real/approved-eval.json
-```
-
-This keeps generated local state separate from reproducible repository fixtures.
+When working from the source repository, these runtime artifacts are ignored by Git.
 
 ---
 
@@ -779,7 +773,7 @@ A normalized entity looks conceptually like:
 
 This dependency direction is intentional.
 
-EvalTape core should reason about normalized evidence rather than knowing every product's raw API structure.
+EvalTape core reasons about normalized evidence rather than knowing every product's raw API structure.
 
 ---
 
@@ -787,13 +781,13 @@ EvalTape core should reason about normalized evidence rather than knowing every 
 
 External product data is treated as untrusted.
 
-The GitHub adapter validates raw input at runtime before converting it into EvalTape state.
+The GitHub adapter validates raw input before converting it into EvalTape state.
 
 Malformed data fails closed.
 
-For example, an issue number arriving as a string instead of a number is rejected instead of being quietly interpreted.
+For example, an issue number arriving as a string instead of a number is rejected instead of quietly being interpreted.
 
-This protects the evaluator from making decisions on malformed evidence.
+This protects the evaluator from making decisions using malformed evidence.
 
 ---
 
@@ -853,7 +847,7 @@ V0 prioritizes trustworthy behavior over pretending to understand arbitrary inst
 
 # Deterministic Evaluation
 
-The final contract evaluation is deterministic.
+The final contract verdict is deterministic.
 
 An LLM is not currently deciding whether the run passed.
 
@@ -875,7 +869,7 @@ EvalTape aims to keep the final verdict inspectable and reproducible.
 
 # Current Contract Model
 
-Contracts can contain:
+Contracts contain:
 
 ```text
 MUST
@@ -889,7 +883,7 @@ MUST NOT
 
 assertions.
 
-Assertions currently support operators including:
+Current operators include:
 
 ```text
 equals
@@ -912,19 +906,9 @@ after
 
 snapshots.
 
-Expected values can be:
+Expected values can be literal values or references to dynamic task variables.
 
-```text
-literal values
-```
-
-or dynamic references to:
-
-```text
-task variables
-```
-
-This means a contract can remain reusable even when task-specific values change.
+That allows a contract to remain reusable even when task-specific values change.
 
 ---
 
@@ -960,7 +944,7 @@ Contracts reference dynamic task variables rather than unnecessarily hard-coding
 
 # What EvalTape V0 Has Proven
 
-The project has demonstrated the following behaviors:
+EvalTape V0 has demonstrated:
 
 1. Generic normalized entity state.
 2. Generic state diffing.
@@ -980,16 +964,20 @@ The project has demonstrated the following behaviors:
 16. Adapter registry.
 17. Runtime validation.
 18. Real GitHub Issues integration.
-19. Real human browser demonstration.
+19. Real human browser demonstrations.
 20. Compiler rejection of contradictory demonstrations.
 21. Automatic human-demo before / after capture.
 22. Natural-language task persistence.
-23. Automatic agent-run baseline / result capture.
+23. Automatic agent-run baseline and result capture.
 24. Real alternate-agent PASS.
 25. Real incorrect-agent FAIL.
 26. Preserved evaluation evidence.
+27. Fresh-clone installation.
+28. npm-package build and packaging.
+29. npm-package execution outside the source repository.
+30. Runtime operation without `tsx`.
 
-This proves the core V0 thesis.
+This proves the core V0 thesis for one narrow task family.
 
 It does **not** mean EvalTape is production-ready.
 
@@ -1004,7 +992,6 @@ Current limitations include:
 - natural-language task authoring supports only a narrow GitHub issue creation grammar
 - task-variable names currently need to match normalized entity field names
 - selector inference is currently heuristic
-- the first matched task variable is currently used as the selector
 - duplicate titles can create ambiguous selectors
 - ambiguous selectors fail closed
 - array equality is currently order-sensitive
@@ -1014,11 +1001,13 @@ Current limitations include:
 - asynchronous / eventual-consistency polling is not implemented
 - flaky-environment handling is not implemented
 - privacy and evidence-redaction controls are not implemented
-- approved eval file validation is still shallow in some paths
+- approved eval validation is still shallow in some paths
 - TaskSpec runtime validation should be strengthened
 - human confirmation currently supports approve / reject, not rich interactive editing
 - generic arbitrary-browser recording is not implemented
 - arbitrary products do not automatically work without an adapter
+- native Windows behavior has not yet been fully validated
+- V0 currently depends on GitHub CLI for the GitHub Issues integration
 
 These are known boundaries, not hidden capabilities.
 
@@ -1056,7 +1045,7 @@ must not delete existing data
 must perform action A before action B
 ```
 
-Outcome-only evaluation is powerful, but it is not sufficient for every safety or business-critical workflow.
+Outcome-only evaluation is useful, but it is not sufficient for every safety-critical or business-critical workflow.
 
 ---
 
@@ -1072,7 +1061,7 @@ EvalTape is not currently:
 - a general-purpose benchmark suite
 - a production SaaS
 - a replacement for product-specific adapters
-- a guarantee that any demonstrated behavior is automatically a good eval
+- a guarantee that any demonstrated behavior automatically becomes a good eval
 
 EvalTape's current job is narrower:
 
@@ -1080,14 +1069,56 @@ EvalTape's current job is narrower:
 
 ---
 
+# Development
+
+Clone the source repository:
+
+```bash
+git clone https://github.com/AidaMichel/evaltape.git
+cd evaltape
+npm install
+```
+
+Run the tests:
+
+```bash
+npm test
+```
+
+Build the production CLI:
+
+```bash
+npm run build
+```
+
+Run directly:
+
+```bash
+node bin/evaltape.js
+```
+
+Or link the development version locally:
+
+```bash
+npm link
+evaltape
+```
+
+Inspect the npm package before publishing:
+
+```bash
+npm pack --dry-run
+```
+
+---
+
 # Repository Structure
 
-Important files include:
+Important source files include:
 
 ```text
 src/
   adapter.ts
-  actions.ts
   agent-run.ts
   cli.ts
   compiler.ts
@@ -1098,7 +1129,6 @@ src/
   evaluator.ts
   evaluator.test.ts
   recording.ts
-  state.ts
   store.ts
   task.ts
   task-authoring.ts
@@ -1110,52 +1140,18 @@ src/
     registry.ts
     shop.ts
 
-examples/
-  github-real/
-    approved-eval.json
-    ...
+bin/
+  evaltape.js
 
-.evaltape/
-  recordings/
-  runs/
-  evals/
+dist/
+  generated production JavaScript
 ```
 
-Runtime `.evaltape` data is ignored by Git.
-
----
-
-# Development
-
-Run all tests:
-
-```bash
-npm test
-```
-
-Run the CLI directly without `npm link`:
-
-```bash
-npx tsx src/cli.ts
-```
-
-Or after:
-
-```bash
-npm link
-```
-
-use:
-
-```bash
-evaltape
-```
+`dist/` is generated during the build and is not committed to the source repository.
 
 ---
 
 # Design Rules
-
-Several rules currently guide EvalTape development.
 
 ## 1. Task intent is authoritative
 
@@ -1193,11 +1189,11 @@ Runs store enough evidence to understand what was evaluated and why.
 
 # The Thesis
 
-EvalTape is built around a simple hypothesis:
+EvalTape is built around a falsifiable hypothesis:
 
 > Given a task description, a successful human demonstration, and structured before / after state, EvalTape can propose a small success contract that a human can quickly approve and that can correctly evaluate alternate agent trajectories.
 
-The V0 GitHub proof supports that hypothesis for one narrow task family.
+The GitHub Issues V0 supports that hypothesis for one narrow task family.
 
 The next challenge is not to add every possible feature.
 
@@ -1205,25 +1201,42 @@ It is to determine whether the workflow remains useful and understandable when s
 
 ---
 
-# Current Status
+# Contributing
 
-**Status: V0 technical proof and clean-install validation complete. External-user validation next.**
+EvalTape is intentionally small while the core workflow is being validated.
 
-EvalTape V0 has now been validated through:
+Before proposing a large feature expansion, consider whether the change improves one of these areas:
 
-- development-environment tests
-- real GitHub Issues demonstrations
-- deterministic PASS and FAIL evaluation
-- alternate agent execution paths
-- a fresh clone and installation
-- eval authoring from the fresh clone
-- a complete alternate-agent run from the fresh clone
+- contract correctness
+- evaluation reliability
+- adapter quality
+- evidence quality
+- installation
+- usability
+- external-user validation
 
-The next milestone is external-user validation: can someone who did not build EvalTape understand, install, and use the workflow without developer guidance?
+Bug reports and focused pull requests are welcome.
 
-Until that is tested, the priority is usability and evidence rather than expanding the feature surface.
+Repository:
+
+```text
+https://github.com/AidaMichel/evaltape
+```
+
+Issues:
+
+```text
+https://github.com/AidaMichel/evaltape/issues
+```
+
 ---
 
-## One sentence
+# License
+
+MIT
+
+---
+
+# One Sentence
 
 **EvalTape lets you demonstrate success once, turn it into an approved acceptance test, and evaluate whether another agent reaches the same required outcome—even by a different path.**

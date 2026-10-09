@@ -114,7 +114,7 @@ AUTHOR AN EVAL
 TEST ANOTHER EXECUTION
 
   evaltape run \\
-    --eval examples/github-real/approved-eval.json \\
+    --eval PATH_TO_APPROVED_EVAL.json \\
     --repo owner/repository
 
   evaltape check
