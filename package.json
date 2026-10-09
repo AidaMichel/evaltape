@@ -2,6 +2,14 @@
   "name": "evaltape",
   "version": "0.1.0",
   "description": "Turn a demonstrated task into a human-approved outcome contract and test whether another agent satisfies it.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AidaMichel/evaltape.git"
+  },
+  "homepage": "https://github.com/AidaMichel/evaltape#readme",
+  "bugs": {
+    "url": "https://github.com/AidaMichel/evaltape/issues"
+  },
   "scripts": {
     "test": "tsx --test src/*.test.ts"
   },

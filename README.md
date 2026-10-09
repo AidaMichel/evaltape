@@ -1207,17 +1207,21 @@ It is to determine whether the workflow remains useful and understandable when s
 
 # Current Status
 
-**Status: V0 technical proof complete. User-ready MVP validation next.**
+**Status: V0 technical proof and clean-install validation complete. External-user validation next.**
 
-The immediate next steps are:
+EvalTape V0 has now been validated through:
 
-- test installation from a fresh clone
-- follow only this README
-- identify any undocumented assumptions
-- improve CLI ergonomics based on fresh-user friction
-- validate the workflow with another person
-- only then decide which capability should expand next
+- development-environment tests
+- real GitHub Issues demonstrations
+- deterministic PASS and FAIL evaluation
+- alternate agent execution paths
+- a fresh clone and installation
+- eval authoring from the fresh clone
+- a complete alternate-agent run from the fresh clone
 
+The next milestone is external-user validation: can someone who did not build EvalTape understand, install, and use the workflow without developer guidance?
+
+Until that is tested, the priority is usability and evidence rather than expanding the feature surface.
 ---
 
 ## One sentence
