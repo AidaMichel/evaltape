@@ -1,15 +1,25 @@
 {
-  "name": "evaltape-lab",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "evaltape",
+  "version": "0.1.0",
+  "description": "Turn a demonstrated task into a human-approved outcome contract and test whether another agent satisfies it.",
   "scripts": {
     "test": "tsx --test src/*.test.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "keywords": [
+    "ai-agents",
+    "evals",
+    "agent-evaluation",
+    "testing",
+    "automation"
+  ],
+  "author": "AidaMichel",
+  "license": "MIT",
+  "bin": {
+    "evaltape": "./bin/evaltape"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  },
   "devDependencies": {
     "@types/node": "^26.6.4",
     "tsx": "^4.23.15",
@@ -17,11 +27,5 @@
   },
   "allowScripts": {
     "esbuild@0.28.2": true
-  },
-  "dependencies": {
-    "zod": "^4.6.5"
-  },
-  "bin": {
-    "evaltape": "./bin/evaltape"
   }
 }
