@@ -1,0 +1,7 @@
+node_modules/
+
+.evaltape/recordings/
+.evaltape/active-recording.json
+.evaltape/evals/
+.evaltape/runs/
+.evaltape/active-run.json

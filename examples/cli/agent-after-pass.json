@@ -1,0 +1,25 @@
+{
+  "capturedAt": 100,
+  "entities": [
+    {
+      "key": "issue:1",
+      "type": "issue",
+      "id": 1,
+      "data": {
+        "title": "Button alignment",
+        "priority": "low",
+        "assignee": "Omar"
+      }
+    },
+    {
+      "key": "issue:agent-created-9001",
+      "type": "issue",
+      "id": 9001,
+      "data": {
+        "title": "Payment timeout",
+        "priority": "high",
+        "assignee": "Bob"
+      }
+    }
+  ]
+}

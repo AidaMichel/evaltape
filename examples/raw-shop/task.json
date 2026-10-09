@@ -1,0 +1,27 @@
+{
+  "id": "task:shop-raw-demo",
+  "currentInstruction": "Create paid order ORD-2001 for AED 250.",
+  "variables": {
+    "orderNumber": {
+      "name": "orderNumber",
+      "value": "ORD-2001",
+      "version": 1
+    },
+    "status": {
+      "name": "status",
+      "value": "paid",
+      "version": 1
+    },
+    "total": {
+      "name": "total",
+      "value": 250,
+      "version": 1
+    },
+    "currency": {
+      "name": "currency",
+      "value": "AED",
+      "version": 1
+    }
+  },
+  "version": 1
+}

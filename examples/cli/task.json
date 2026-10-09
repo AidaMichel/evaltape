@@ -1,0 +1,22 @@
+{
+  "id": "task:cli-demo",
+  "currentInstruction": "Create a high-priority issue called \"Payment timeout\" assigned to Bob.",
+  "variables": {
+    "title": {
+      "name": "title",
+      "value": "Payment timeout",
+      "version": 1
+    },
+    "priority": {
+      "name": "priority",
+      "value": "high",
+      "version": 1
+    },
+    "assignee": {
+      "name": "assignee",
+      "value": "Bob",
+      "version": 1
+    }
+  },
+  "version": 1
+}

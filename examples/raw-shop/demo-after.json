@@ -1,0 +1,19 @@
+{
+  "capturedAt": 2,
+  "orders": [
+    {
+      "orderNumber": "ORD-1000",
+      "status": "paid",
+      "total": 50,
+      "currency": "AED",
+      "customerEmail": "old@example.com"
+    },
+    {
+      "orderNumber": "ORD-2001",
+      "status": "paid",
+      "total": 250,
+      "currency": "AED",
+      "customerEmail": "customer@example.com"
+    }
+  ]
+}

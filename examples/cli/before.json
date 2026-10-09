@@ -1,0 +1,15 @@
+{
+  "capturedAt": 1,
+  "entities": [
+    {
+      "key": "issue:1",
+      "type": "issue",
+      "id": 1,
+      "data": {
+        "title": "Button alignment",
+        "priority": "low",
+        "assignee": "Omar"
+      }
+    }
+  ]
+}

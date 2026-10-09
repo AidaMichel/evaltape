@@ -1,0 +1,24 @@
+{
+  "id": "task:github-real-001",
+  "currentInstruction": "Create an open GitHub issue titled \"EvalTape real adapter test 001\" assigned to AidaMichel.",
+  "variables": {
+    "title": {
+      "name": "title",
+      "value": "EvalTape real adapter test 001",
+      "version": 1
+    },
+    "state": {
+      "name": "state",
+      "value": "open",
+      "version": 1
+    },
+    "assignees": {
+      "name": "assignees",
+      "value": [
+        "AidaMichel"
+      ],
+      "version": 1
+    }
+  },
+  "version": 1
+}
