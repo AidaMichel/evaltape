@@ -41,6 +41,14 @@ import {
 } from "./recording";
 
 import {
+  initProject
+} from "./project";
+
+import {
+  runDoctor
+} from "./doctor";
+
+import {
   loadApprovedEval,
   saveApprovedEval
 } from "./store";
@@ -97,6 +105,13 @@ function getOption(
 function printUsage() {
   console.log(`
 EvalTape V0
+
+
+PROJECT SETUP
+
+  evaltape init
+
+  evaltape doctor
 
 
 AUTHOR AN EVAL
@@ -444,6 +459,121 @@ async function runRaw(
   );
 }
 
+async function initializeProject(
+  args: string[]
+) {
+  if (
+    args.length !==
+    0
+  ) {
+    console.log(
+      "\ninit does not require options."
+    );
+
+    printUsage();
+
+    process.exitCode =
+      2;
+
+    return;
+  }
+
+  const result =
+    await initProject();
+
+  console.log(
+    "\n✓ EVALTAPE PROJECT INITIALIZED"
+  );
+
+  console.log(
+    `Project: ${result.root}`
+  );
+
+  console.log(
+    `Config: ${result.configFile}`
+  );
+
+  console.log(
+    `Evals: ${result.evalsDirectory}`
+  );
+
+  console.log(
+    result.configCreated
+      ? "✓ Created config"
+      : "✓ Existing config preserved"
+  );
+
+  console.log(
+    result.gitignoreUpdated
+      ? "✓ Updated .gitignore"
+      : "✓ .gitignore already configured"
+  );
+}
+
+async function doctor(
+  args: string[]
+) {
+  if (
+    args.length !==
+    0
+  ) {
+    console.log(
+      "\ndoctor does not require options."
+    );
+
+    printUsage();
+
+    process.exitCode =
+      2;
+
+    return;
+  }
+
+  const result =
+    await runDoctor();
+
+  console.log(
+    "\nEVALTAPE DOCTOR\n"
+  );
+
+  for (
+    const check of
+      result.checks
+  ) {
+    const symbol =
+      check.passed
+        ? "✓"
+        : "✗";
+
+    console.log(
+      `${symbol} ${check.label}`
+    );
+
+    console.log(
+      `  ${check.detail}`
+    );
+  }
+
+  console.log("");
+
+  if (
+    result.passed
+  ) {
+    console.log(
+      "READY ✓"
+    );
+
+    return;
+  }
+
+  console.log(
+    "NOT READY ✗"
+  );
+
+  process.exitCode =
+    1;
+}
+
 async function record(
   args: string[]
 ) {
@@ -764,6 +894,28 @@ async function main() {
     command,
     ...args
   ] = process.argv;
+
+  if (
+    command ===
+    "init"
+  ) {
+    await initializeProject(
+      args
+    );
+
+    return;
+  }
+
+  if (
+    command ===
+    "doctor"
+  ) {
+    await doctor(
+      args
+    );
+
+    return;
+  }
 
   if (
     command ===

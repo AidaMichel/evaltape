@@ -86,6 +86,8 @@ The full V0 workflow has been validated against real GitHub Issues, including:
 - packaged npm tarball installation
 - execution outside the source repository
 - execution without `tsx`
+- project-local initialization with `evaltape init`
+- environment diagnostics with `evaltape doctor`
 
 The next milestone is external-user validation:
 
@@ -97,16 +99,56 @@ Until that is tested, the priority is usability and evidence rather than expandi
 
 # Quick Start
 
-## Run without installing globally
+## Add EvalTape to a project
+
+From the project you want to evaluate:
 
 ```bash
-npx evaltape
+npm install --save-dev evaltape
+```
+
+Initialize EvalTape:
+
+```bash
+npx evaltape init
+```
+
+This creates:
+
+```text
+.evaltape/
+├── config.json
+└── evals/
+```
+
+Approved evals can live with the project in `.evaltape/evals/`.
+
+Temporary recordings, runs, and active runtime state are added to `.gitignore`.
+
+Check whether the local environment is ready:
+
+```bash
+npx evaltape doctor
+```
+
+A ready environment reports:
+
+```text
+READY ✓
 ```
 
 See the available adapters:
 
 ```bash
 npx evaltape adapters
+```
+
+## Run without adding EvalTape to a project
+
+You can also inspect the CLI directly:
+
+```bash
+npx evaltape
 ```
 
 ## Or install globally

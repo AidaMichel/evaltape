@@ -1,6 +1,6 @@
 {
   "name": "evaltape",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Turn a demonstrated task into a human-approved outcome contract and test whether another agent satisfies it.",
   "repository": {
     "type": "git",
