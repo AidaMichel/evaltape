@@ -26,6 +26,61 @@ import {
   loadApprovedEval
 } from "./store";
 
+import type { OutcomeContract } from "./contract";
+import type { EnvironmentSnapshot, TaskSpec } from "./types";
+
+export interface AgentRunObservationOptions {
+  before: EnvironmentSnapshot;
+  task: TaskSpec;
+  contract: OutcomeContract;
+  capture: () => Promise<unknown>;
+  normalize: (raw: unknown) => EnvironmentSnapshot;
+  sleep?: (milliseconds: number) => Promise<void>;
+  maxObservations?: number;
+  intervalMs?: number;
+}
+
+/* Retry observation failures only; never recapture the frozen before-state. */
+export async function observeAgentRun({
+  before,
+  task,
+  contract,
+  capture,
+  normalize,
+  sleep = (milliseconds) => new Promise<void>((resolve) => {
+    setTimeout(resolve, milliseconds);
+  }),
+  maxObservations = 5,
+  intervalMs = 2000
+}: AgentRunObservationOptions) {
+  if (!Number.isSafeInteger(maxObservations) || maxObservations < 1) {
+    throw new Error("maxObservations must be a positive safe integer.");
+  }
+  if (!Number.isFinite(intervalMs) || intervalMs < 0) {
+    throw new Error("intervalMs must be a non-negative finite number.");
+  }
+
+  for (let observation = 1; ; observation += 1) {
+    // Capture/normalization exceptions propagate without fabricating a verdict.
+    const rawAfter = await capture();
+    const after = normalize(rawAfter);
+    const result = evaluateContract(before, after, task, contract);
+    const requiredFailures = result.checks.filter(
+      (check) => check.required && !check.passed
+    );
+    const retryable = result.valid && !result.stale &&
+      result.error === undefined && requiredFailures.length > 0 &&
+      requiredFailures.every(
+        (check) => check.snapshot === "after" && check.error === undefined
+      );
+
+    if (result.passed || !retryable || observation >= maxObservations) {
+      return { rawAfter, after, result };
+    }
+    await sleep(intervalMs);
+  }
+}
+
 export interface ActiveAgentRun {
   schemaVersion: 1;
   id: string;
@@ -315,20 +370,24 @@ export async function checkAgentRun():
       beforeContents
     ) as unknown;
 
-  const rawAfter =
-    await captureGitHubIssues(
-      run.repo
-    );
-
   const before =
     githubIssuesAdapter.normalize(
       rawBefore
     );
 
-  const after =
-    githubIssuesAdapter.normalize(
-      rawAfter
+  const saved =
+    await loadApprovedEval(
+      run.evalFile
     );
+
+  const { rawAfter, after, result } =
+    await observeAgentRun({
+      before,
+      task: saved.task,
+      contract: saved.contract,
+      capture: () => captureGitHubIssues(run.repo),
+      normalize: (raw) => githubIssuesAdapter.normalize(raw)
+    });
 
   const afterFile =
     resolve(
@@ -345,19 +404,6 @@ export async function checkAgentRun():
     ) + "\n",
     "utf8"
   );
-
-  const saved =
-    await loadApprovedEval(
-      run.evalFile
-    );
-
-  const result =
-    evaluateContract(
-      before,
-      after,
-      saved.task,
-      saved.contract
-    );
 
   const resultFile =
     resolve(
